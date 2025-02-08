@@ -188,7 +188,7 @@ class LinkedList {
   async saveToJson(fileName) {
     // TODO
     const students = [];
-    ley current = this.head;
+    let current = this.head;
     while (current) {
       students.push(current.data);
       current = current.next;
