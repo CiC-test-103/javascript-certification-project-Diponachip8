@@ -165,7 +165,7 @@ class LinkedList {
    */
   filterBySpecialization(specialization) {
     // TODO
-    return this.#sortStudentsByName().filter(student => student.specialization === specialization;
+    return this.#sortStudentsByName().filter(student => student.specialization === specialization);
   }
 
   /**
@@ -177,7 +177,7 @@ class LinkedList {
    */
   filterByMinAge(minAge) {
     // TODO
-    return this.#sortStudentsByName().filter(student => student.age >= minAge;
+    return this.#sortStudentsByName().filter(student => student.age >= minAge);
   }
 
   /**
@@ -213,6 +213,7 @@ class LinkedList {
     } catch (error){
       console.error("Error loading from JSON:", error);
     }
-  }
+   }
+}
 
 module.exports = { LinkedList }
