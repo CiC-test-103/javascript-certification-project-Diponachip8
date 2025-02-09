@@ -47,9 +47,18 @@ async function handleCommand(command) {
         console.log('Adding student...')
         const [name, year, email, specialization] = args
         // --------> WRITE YOUR CODE BELOW
+        if (!name || !year || !email || !specialization) {
+          console.log("Error: Missing Information. Use: add [name][year][email][specialization]");
+          break;
+        }
+        const newStudent = new Student(name, email, partInt(year), specialization);
+        studentManagementSystem.addStudent(newStudent);
+        console.log(`Student added: ${name}`);
+        console.log("Updated Student List:", studentManagementSystem.displayStudents());
 
         // --------> WRITE YOUR CODE ABOVE
         break;
+      
 
     case 'remove':
       /**
@@ -62,7 +71,14 @@ async function handleCommand(command) {
        */
       console.log('Removing student...')
       // --------> WRITE YOUR CODE BELOW
-      
+      const removeEmail = args[0];
+      if (!removeEmail) {
+        console.log("Error: Please provide and Email. Use: remove [email]");
+        break;
+      }
+      studentManagementSystem.removeStudent(removeEmail);
+      console.log(`Student with email ${removeEmail} removed.`);
+      console.log("Updated Student List:", studentManagementSystem.displayStudents());
       // --------> WRITE YOUR CODE ABOVE
       break;
 
@@ -75,6 +91,8 @@ async function handleCommand(command) {
        */
       console.log('Displaying students...')
       // --------> WRITE YOUR CODE BELOW
+      const studentList = studentManagementSystem.displayStudents();
+      console.log(studentList.length > 0 ? studentList : "No students found.");
 
       // --------> WRITE YOUR CODE ABOVE
       break;
@@ -91,7 +109,13 @@ async function handleCommand(command) {
        */
       console.log('Finding student...')
       // --------> WRITE YOUR CODE BELOW
-      
+      const findEmail = args[0];
+      if (!findEmail) {
+        console.log("Error: Please provide an email. Use: find[email]");
+        break;
+      }
+      const student = studentManagementSystem.findStudent(findEmail);
+      console.log(student !== -1 ? student : "Student does not exist.");
       // --------> WRITE YOUR CODE ABOVE
       break;
 
@@ -106,7 +130,10 @@ async function handleCommand(command) {
        */
       console.log('Saving data...')
       // --------> WRITE YOUR CODE BELOW
-
+      const saveFileName = args[0] || "students.json";
+      fs.writeFileSync(saveFileName, JSON.stringify(studentManagementSystem.toArray(), null, 2));
+      console.log(`Data saved to ${saveFileName}`);
+      break;
       // --------> WRITE YOUR CODE ABOVE
 
     case "load":
@@ -120,7 +147,18 @@ async function handleCommand(command) {
        */
       console.log('Loading data...')
       // --------> WRITE YOUR CODE BELOW
-
+      const loadFileName = args[0] || "students.json";
+      if (!fs.existsSync(loadFileName)) {
+        console.log("Error: File does not exist.");
+        break;
+      }
+      const data = JSON.parse(fs.readFileSync(loadFileName, "utf8"));
+      studentManagementSystem.clearStudents();
+      data.forEach((student) => {
+        studentManagementSystem.addStudent(new Student(student.name, student.email, student.year, student.specialization));
+      });
+      console.log(`Data loaded from ${loadedFileName}`);
+      console.log("Updated Student List:", studentManagementSystem.displayStudents());
       // --------> WRITE YOUR CODE ABOVE
       break;
 
@@ -134,7 +172,8 @@ async function handleCommand(command) {
        */
       console.log('Clearing data...')
       // --------> WRITE YOUR CODE BELOW
-
+      studentManagementSystem.clearStudents();
+      console.log("All students removed.");
       // --------> WRITE YOUR CODE ABOVE
       break;
 
