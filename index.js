@@ -51,7 +51,7 @@ async function handleCommand(command) {
           console.log("Error: Missing Information. Use: add [name][year][email][specialization]");
           break;
         }
-        const newStudent = new Student(name, email, partInt(year), specialization);
+        const newStudent = new Student(name, email, parseInt(year), specialization);
         studentManagementSystem.addStudent(newStudent);
         console.log(`Student added: ${name}`);
         console.log("Updated Student List:", studentManagementSystem.displayStudents());
