@@ -134,7 +134,7 @@ class LinkedList {
     let students = [];
     let current = this.head;
     while (current) {
-      students.push(current.data);
+      students.push(`Name: ${current.data.name}, Email: ${current.data.email}, Year: ${current.data.year}, Specialization: ${current.data.specialization}`);
       current = current.next;
     }
     return students.join(", "); 
