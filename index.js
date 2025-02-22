@@ -2,6 +2,7 @@
 const { LinkedList } = require("./LinkedList");
 const { Student } = require('./Student')
 const readline = require('readline');
+const fs = require ('fs');
 
 // Initialize terminal interface
 const rl = readline.createInterface({
@@ -47,11 +48,12 @@ async function handleCommand(command) {
         console.log('Adding student...')
         const [name, year, email, specialization] = args
         // --------> WRITE YOUR CODE BELOW
-        if (!name || !year || !email || !specialization) {
-          console.log("Error: Missing Information. Use: add [name][year][email][specialization]");
-          break;
+                const parsedYear = parseInt(year);
+        if (args.length < 4 || !name || isNaN(parsedYear) || !email || !specialization) {
+            console.log("Error: Invalid. Use: add [name][year][email][specialization]");
+            break;
         }
-        const newStudent = new Student(name, email, parseInt(year), specialization);
+        const newStudent = new Student(name, parsedYear, email, specialization);
         studentManagementSystem.addStudent(newStudent);
         console.log(`Student added: ${name}`);
         console.log("Updated Student List:", studentManagementSystem.displayStudents());
@@ -92,7 +94,7 @@ async function handleCommand(command) {
       console.log('Displaying students...')
       // --------> WRITE YOUR CODE BELOW
       const studentList = studentManagementSystem.displayStudents();
-      console.log(studentList.length > 0 ? studentList : "No students found.");
+      console.log(studentList.length > 0 ? studentList.join("\n") : "No students found.");
 
       // --------> WRITE YOUR CODE ABOVE
       break;
@@ -115,7 +117,7 @@ async function handleCommand(command) {
         break;
       }
       const student = studentManagementSystem.findStudent(findEmail);
-      console.log(student !== -1 ? student : "Student does not exist.");
+      console.log(student !== -1 ? student.getString(): "Student does not exist.");
       // --------> WRITE YOUR CODE ABOVE
       break;
 
@@ -131,7 +133,7 @@ async function handleCommand(command) {
       console.log('Saving data...')
       // --------> WRITE YOUR CODE BELOW
       const saveFileName = args[0] || "students.json";
-      fs.writeFileSync(saveFileName, JSON.stringify(studentManagementSystem.toArray(), null, 2));
+      await studentManagementSystem.saveToJson(saveFileName);
       console.log(`Data saved to ${saveFileName}`);
       break;
       // --------> WRITE YOUR CODE ABOVE
@@ -152,12 +154,8 @@ async function handleCommand(command) {
         console.log("Error: File does not exist.");
         break;
       }
-      const data = JSON.parse(fs.readFileSync(loadFileName, "utf8"));
-      studentManagementSystem.clearStudents();
-      data.forEach((student) => {
-        studentManagementSystem.addStudent(new Student(student.name, student.email, student.year, student.specialization));
-      });
-      console.log(`Data loaded from ${loadedFileName}`);
+      await studentManagementSystem.loadedFromJSON(loadFileName);
+      console.log(`Data loaded from ${loadFileName}`);
       console.log("Updated Student List:", studentManagementSystem.displayStudents());
       // --------> WRITE YOUR CODE ABOVE
       break;
