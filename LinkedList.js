@@ -1,6 +1,6 @@
 // Necessary Imports (you will need to use this)
 const { Student } = require('./Student')
-
+const fs = require('fs').promises;
 /**
  * Node Class (GIVEN, you will need to use this)
  */
@@ -50,8 +50,9 @@ class LinkedList {
    * - Think about the null case
    * - Think about adding to the 'end' of the LinkedList (Hint: tail)
    */
-  addStudent(newStudent) {
+  addStudent(student) {
     // TODO
+    const newStudent = new Student(student)
     const newNode = new Node(newStudent);
     if(!this.head) {
       this.head = newNode;
@@ -60,7 +61,7 @@ class LinkedList {
       this.tail.next = newNode;
       this.tail = newNode;
     }
-    this.length++;
+    this.length++; 
     
   }
 
@@ -76,21 +77,22 @@ class LinkedList {
     // TODO
     if(!this.head) return;
 
-    if (this.head.data.email === email) {
+    if (this.head.data.getEmail() === email) {
       this.head = this.head.next;
       if (!this.head) this.tail = null;
-      this.lemgth--;
+      this.length--;
       return;
     }
 
      let current = this.head;
-     while ( current.next && current.next.data.email !== email) {
+     while (current.next) {
+       if(current.next.data.getEmail() === email){
+         current.next = current.next.next;
+         if (!current.next) this.tail = current;
+         this.length--;
+         return;
+       }
        current = current.next;
-     } 
-     if (current.next) {
-       if (current.next === this.tail) this.tail = current;
-       current.next = current.next.next;
-       this.length--;
      }
    }
 
@@ -103,10 +105,12 @@ class LinkedList {
     // TODO
     let current = this.head;
     while (current) {
-      if (current.data.email === email) return current.data;
+      if (current.data.getEmail() === email) { 
+        return current.data;
+      }
       current = current.next;
     }
-    return -1;
+    return null;
   }
 
   /**
@@ -114,7 +118,7 @@ class LinkedList {
    * EFFECTS:   Clears all students from the Linked List
    * RETURNS:   None
    */
-  #clearStudents() {
+  clearStudents() {
     // TODO
     this.head = null;
     this.tail = null;
@@ -134,10 +138,10 @@ class LinkedList {
     let students = [];
     let current = this.head;
     while (current) {
-      students.push(`Name: ${current.data.name}, Email: ${current.data.email}, Year: ${current.data.year}, Specialization: ${current.data.specialization}`);
+      students.push(current.data.getString());
       current = current.next;
-    }
-    return students.join(", "); 
+      }
+    return students; 
   }
 
   /**
@@ -150,10 +154,10 @@ class LinkedList {
     let students = []
     let current = this.head;
     while (current) {
-      students.push(current.date);
+      students.push(current.data);
       current = current.next;
     }
-    return students.sort((a,b) => a.name.localCompare(b.name));
+    return students.sort((a, b) => a.getName().localeCompare(b.getName()));
   }
 
   /**
@@ -165,7 +169,7 @@ class LinkedList {
    */
   filterBySpecialization(specialization) {
     // TODO
-    return this.#sortStudentsByName().filter(student => student.specialization === specialization);
+    return this.#sortStudentsByName().filter(student => student.getSpecialization() === specialization);
   }
 
   /**
@@ -177,7 +181,7 @@ class LinkedList {
    */
   filterByMinAge(minAge) {
     // TODO
-    return this.#sortStudentsByName().filter(student => student.age >= minAge);
+    return this.#sortStudentsByName().filter(student => student.getYear() <= new Date().getFullYear() - minAge);
   }
 
   /**
@@ -187,13 +191,29 @@ class LinkedList {
    */
   async saveToJson(fileName) {
     // TODO
-    const students = [];
+    try{
+      const studentsArray = [];
+      let current = this.head;
+
+      while (current) {
+        studentsArray.push(current.data);
+        current = current.next;
+      }
+
+
+
+      const jsonData = JSON.stringify(studentsArray, null,2);
+      await fs.writeFile(fileName, jsonData, 'utf8');
+      console.log(`LinkedList saved to ${fileName}`);
+    } catch (error) {
+      console.error(`Error saving LinkedList to JSON: ${error.message}`);
+    }
+
     let current = this.head;
     while (current) {
       students.push(current.data);
       current = current.next;
     }
-    await fs.writeFile (fileName,JSON.stringify(students, null, 2));
   }
 
   /**
@@ -206,14 +226,24 @@ class LinkedList {
   async loadFromJSON(fileName) {
     // TODO
     try{
-      const data = await fs. readFile(fileName, "utf8");
+
+      this.clearStudents();
+      const data = await fs.readFile(fileName, 'utf8');
       const studentsArray = JSON.parse(data);
-      this.#clearStudents();
-      studentsArray.forEach(studentData => this.addStudent(new Student(studentData.name, studentsData.email, studentData.age, studentData.specialization)));
-    } catch (error){
-      console.error("Error loading from JSON:", error);
+
+      for(const studentData of studentsArray) {
+        const{name, year, email, specialization} = studentData;
+        const newStudent = new Student (name, year, email, specialization);
+        this.addStudent(newStudent);
+      }
+      console.log(`Data loaded from ${fileName}`);
+    } catch (error) {
+      console.error(`Error loading LinkedList from JSON: ${error.message}`);
     }
-   }
+  }
+
+
+   
 }
 
 module.exports = { LinkedList }
